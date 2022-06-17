@@ -42,6 +42,7 @@ Status DataServiceSplitProvider::GetNext(Tensor* split, bool* end_of_splits) {
                                      split_provider_index_, *split,
                                      *end_of_splits);
       },
+      should_retry_,
       "get next split",
       /*deadline_micros=*/Env::Default()->NowMicros() +
           (timeout_ms_ * EnvTime::kMillisToMicros)));

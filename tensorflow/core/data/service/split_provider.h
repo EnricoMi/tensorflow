@@ -35,11 +35,26 @@ class DataServiceSplitProvider : public SplitProvider {
   DataServiceSplitProvider(const std::string& address,
                            const std::string& protocol, int64_t iteration_id,
                            int64_t split_provider_index, int64_t timeout_ms)
+      : DataServiceSplitProvider(
+          address,
+          protocol,
+          iteration_id,
+          split_provider_index,
+          timeout_ms,
+          [] { return true; }) {}
+
+  DataServiceSplitProvider(const std::string& address,
+                           const std::string& protocol,
+                           int64_t iteration_id,
+                           int64_t split_provider_index,
+                           int64_t timeout_ms,
+                           const std::function<bool()>& should_retry)
       : address_(address),
         protocol_(protocol),
         iteration_id_(iteration_id),
         split_provider_index_(split_provider_index),
-        timeout_ms_(timeout_ms) {}
+        timeout_ms_(timeout_ms),
+        should_retry_(should_retry) {}
 
   Status GetNext(Tensor* split, bool* end_of_splits) override;
   Status Reset() override;
@@ -54,6 +69,7 @@ class DataServiceSplitProvider : public SplitProvider {
   const int64_t iteration_id_;
   const int64_t split_provider_index_;
   const int64_t timeout_ms_;
+  const std::function<bool()>& should_retry_;
 
   mutex mu_;
   int64_t repetition_ = 0;

@@ -383,7 +383,11 @@ DataServiceWorkerImpl::MakeDatasetIterator(standalone::Dataset& dataset,
     for (int i = 0; i < task_def.num_split_providers(); ++i) {
       split_providers.push_back(absl::make_unique<DataServiceSplitProvider>(
           config_.dispatcher_address(), config_.protocol(),
-          task_def.iteration_id(), i, config_.dispatcher_timeout_ms()));
+          task_def.iteration_id(), i, config_.dispatcher_timeout_ms()),
+          [&] {
+            mutex_lock l(mu_);
+            return !cancelled_;
+          });
     }
     TF_RETURN_IF_ERROR(
         dataset.MakeIterator(std::move(split_providers), &iterator));
